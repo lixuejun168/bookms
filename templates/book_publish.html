@@ -1,0 +1,159 @@
+{% extends "bookhome.html" %}
+{% block tab %}
+    <!-- 标签页头 -->
+      <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation"><a href="/book/book_home/">首页</a></li>
+        <li role="presentation"><a href="/book/book_author/">作者</a></li>
+        <li role="presentation" class="active"><a href="/book/book_publish/" aria-controls="publish"  role="tab" data-toggle="tab">出版社</a></li>
+      </ul>
+{% endblock %}
+{% block tab_content %}
+
+    <!-- 出版社页 -->
+    <div role="tabpanel" class="tab-pane active" href="#publish/" id="publish">
+
+        <!-- 编辑出版社模态框 -->
+        <div class="modal fade" id="change_publish" tabindex="-1" role="dialog" aria-labelledby="changePublishLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+
+              <!-- 编辑出版社模态框头 -->
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="changePublishLabel">编辑出版社信息</h4>
+              </div>
+
+                <!-- 编辑出版社模态框体 -->
+              <div class="modal-body">
+                  <form  action="" id="changePublishAjax" method="post">
+                    {%  csrf_token %}
+                    <div class="form-group">
+                        <label for="">出版社名称</label>
+                        <input type="text" class="form-control changePublishName"  name="name" value="">
+                    </div>
+                    <div class="form-group">
+                        <label for="">城市</label>
+                        <input type="text" class="form-control changePublishCity" name="city" value="">
+                    </div>
+                    <div class="form-group">
+                        <label for="">邮箱</label>
+                        <input type="text" class="form-control changePublishEmail" name="email" value="">
+                    </div>
+                </form>
+              </div>
+
+                <!-- 编辑出版社模态框脚 -->
+              <div class="modal-footer">
+                <button  type="button" class="btn btn-default change_publish_cancel " data-dismiss="modal">取消</button>
+                <button href="" name="" type="button" class="btn btn-primary change_publish_save">保存</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 新增出版社模态框 -->
+        <div class="modal fade" id="add_publish" tabindex="-1" role="dialog" aria-labelledby="add_publishLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+
+              <!-- 新增出版社模态框头 -->
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title " id="add_publishLabel">新增出版社</h4>
+              </div>
+
+                <!-- 新增出版社模态框体 -->
+              <div class="modal-body">
+                  <form id="addPublishAjax" action="" method="post" enctype="multipart/form-data">
+                    {%  csrf_token %}
+                    <div class="form-group">
+                        <label for="">出版社名称</label>
+                        <input type="text" class="form-control addPublishName"  name="name" value="">
+                    </div>
+                    <div class="form-group">
+                        <label for="">城市</label>
+                        <input type="text" class="form-control addPublishCity" name="city" value="">
+                    </div>
+                    <div class="form-group">
+                        <label for="">邮箱</label>
+                        <input type="text" class="form-control addPublishEmail" name="email" value="">
+                    </div>
+                </form>
+              </div>
+
+                <!-- 新增出版社模态框脚 -->
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default add_publish_cancel" data-dismiss="modal">取消</button>
+                <button  type="button" class="btn btn-primary add_publish_save">保存</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+       <!-- 展示出版社 -->
+        <div class="col-md-10 col-md-offset-1">
+                <a class="add_btn btn btn-info "data-toggle="modal" data-target="#add_publish">新增出版社</a>
+                <table class="table table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <th>编号</th>
+                            <th>出版社名</th>
+                            <th>城市</th>
+                            <th>邮箱</th>
+                            <th>删除操作</th>
+                            <th>编辑操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for publish in publish_list %}
+                            <tr>
+                                <td>{{ publish.pk }}</td>
+                                <td><a href="/book/{{ publish.pk }}/check_publish_book/" target="_blank" id="publish_name_{{ publish.pk }}">{{ publish.name }}</a></td>
+                                <td id="publish_city_{{ publish.pk }}">{{ publish.city }}</td>
+                                <td id="publish_email_{{ publish.pk }}">{{ publish.email }}</td>
+                                <td><a  href=""name="{{ publish.pk }}" class="btn btn-info change_publish" data-toggle="modal" data-target="#change_publish">编辑</a></td>
+                                <td><a name="{{ publish.pk }}" class="btn btn-danger  delete_publish">删除</a></td>
+                            </tr>
+                            {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+    </div>
+
+
+
+{% endblock  %}
+
+{% block page %}
+
+    <div class="col-md-offset-3">
+        <nav aria-label="Page navigation">
+          <ul class="pagination">
+            {% if publish_list.has_previous %}
+            <li><a href="?page={{ publish_list.previous_page_number  }}" aria-label="Previous"><span aria-hidden="true">上一页</span></a></li>
+            {% else %}
+            <li class="disabled"><a href="" aria-label="Previous"><span aria-hidden="true">上一页</span></a></li>
+            {% endif %}
+
+            {% for item in page_range %}
+
+                {% if current_page_num == item %}
+                    <li class="active"><a href="?page={{ item }}">{{ item }}</a></li>
+                {% else %}
+                    <li><a href="?page={{ item }}">{{ item }}</a></li>
+                {% endif %}
+
+            {% endfor %}
+
+            {% if publish_list.has_next %}
+                <li><a href="?page={{ publish_list.next_page_number  }}" aria-label="Next"><span aria-hidden="true">下一页</span></a>
+            {% else %}
+                        <li class="disabled"><a href="" aria-label="Next"><span aria-hidden="true">下一页</span></a>
+            {% endif %}
+        </li>
+          </ul>
+        </nav>
+    </div>
+
+{% endblock %}

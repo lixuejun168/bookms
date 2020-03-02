@@ -1,0 +1,23 @@
+
+body{
+
+    background-image: url("/static/images/bj1.jpg");
+    background-repeat: repeat-y;
+    background-size: 100% 1200px;
+}
+a {
+    cursor:pointer;
+}
+.container{
+    margin-top: 50px;
+}
+.table{
+    margin-top: 10px;
+}
+.add_btn{
+    margin-top: 20px;
+}
+.check_head{
+    margin-top: 60px;
+}
+

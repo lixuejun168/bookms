@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>bookms</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/home.css">
+
+</head>
+<body>
+    <div class="col-md-offset-1 table">
+        <span>Hi,{{ username }}</span>
+        <a href="/logout/" >注销</a>
+        <p>本次登录时间:{{ last_visit_time }}</p>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div>
+            {% block tab %}
+              <!-- 标签页头 -->
+              <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active"><a href="/book/book_home/" class="head_home" aria-controls="home" role="tab" data-toggle="tab">首页</a></li>
+                <li role="presentation"><a id="author_tab" href="/book/book_author/" aria-controls="author" role="tab" data-toggle="tab">作者</a></li>
+                <li role="presentation"><a id="publish_tab" href="/book/book_publish/" aria-controls="publish"  role="tab" data-toggle="tab">出版社</a></li>
+              </ul>
+            {% endblock %}
+              <!-- 标签页体 -->
+              <div class="tab-content">
+                {% block tab_content %}
+                    <!-- 书籍页 -->
+                    <div role="tabpanel" class="tab-pane active" id="home">
+
+                        <!-- 编辑书籍模态框 -->
+                        <div class="modal fade" id="change_book" tabindex="-1" role="dialog" aria-labelledby="change_bookLabel">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+
+                              <!-- 编辑书籍模态框头 -->
+                              <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title " id="change_bookLabel">编辑书籍</h4>
+                              </div>
+
+                                <!-- 编辑书籍模态框体 -->
+                              <div class="modal-body">
+                                  <form id="changeBookAjax" action="" method="post" enctype="multipart/form-data">
+                                    {%  csrf_token %}
+                                    <div class="form-group">
+                                        <label for="">名称</label>
+                                        <input type="text" class="form-control changeBookTitle" readonly name="title" value="编辑书籍" >
+                                    </div>
+                                    <div class="form-group changeBookPrice_div">
+                                        <label for="">价格</label>
+                                        <input type="text" class="form-control changeBookPrice" name="price" value="">
+                                    </div>
+                                    <div class="form-group ">
+                                        <label for="">出版日期</label>
+                                        <input type="date" class="form-control changeBookPublishDate" name="publishDate" value="">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="">出版社</label>
+                                        <select class="form-control" name="publish_id" >
+                                            {% for publish in publish_list %}
+                                                <option class="changeBookPublish_{{ publish.pk }} bookModalPublish" value="{{ publish.pk }}">{{ publish.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="">作者</label>
+                                        <select type="test"  name="author_id_list" multiple="multiple"  size="5" class="form-control " >
+                                            {% for author in author_list %}
+                                                <option class="changeBookAuthor_{{ author.pk }} change_book_author" value="{{ author.pk }}">{{ author.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </form>
+                              </div>
+
+                                <!-- 编辑书籍模态框脚 -->
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-default change_book_cancel" data-dismiss="modal">取消</button>
+                                <button href="" name="" type="button" class="btn btn-primary change_book_save">保存</button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- 新增书籍模态框 -->
+                        <div class="modal fade" id="add_book" tabindex="-1" role="dialog" aria-labelledby="add_bookLabel">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+
+                              <!-- 新增书籍模态框头 -->
+                              <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title modal-title-book" id="add_bookLabel">新增书籍</h4>
+                              </div>
+
+                                <!-- 新增书籍模态框体 -->
+                              <div class="modal-body">
+                                  <form id="addBookAjax" action="" method="post" enctype="multipart/form-data">
+                                    {%  csrf_token %}
+                                    <div class="form-group">
+                                        <label for="">名称</label>
+                                        <input type="text" class="form-control addBookTitle"  name="title" value="" >
+                                    </div>
+                                    <div class="form-group addBookPrice_div">
+                                        <label for="">价格</label>
+                                        <input type="text" class="form-control addBookPrice" name="price" value="">
+                                    </div>
+                                    <div class="form-group ">
+                                        <label for="">出版日期</label>
+                                        <input type="date" class="form-control addBookPublishDate" name="publishDate" value="">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="">出版社</label>
+                                        <select class="form-control" name="publish_id" >
+                                            {% for publish in publish_list %}
+                                                <option class="addBookPublish_{{ publish.pk }} add_book_publish " value="{{ publish.pk }}">{{ publish.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="">作者</label>
+                                        <select type="test"  name="author_id_list" multiple="multiple"  size="5" class="form-control " >
+                                            {% for author in author_list %}
+                                                <option class="addBookAuthor_{{ author.pk }} add_book_author" value="{{ author.pk }}">{{ author.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </form>
+                              </div>
+
+                                <!-- 新增书籍模态框脚 -->
+                              <div class="modal-footer">
+                                <button href="" type="button" class="btn btn-default add_book_cancel" data-dismiss="modal">取消</button>
+                                <button  type="button" class="btn btn-primary add_book_save">保存</button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+
+                        <!-- 书籍列表展示-->
+                            <div class="col-md-10 col-md-offset-1">
+                                <a class="add_btn btn btn-info" data-toggle="modal" data-target="#add_book">新增书籍</a>
+                                <table class="table  table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>编号</th>
+                                            <th>书籍名称</th>
+                                            <th>价格</th>
+                                            <th>出版时间</th>
+                                            <th>出版社</th>
+                                            <th>作者</th>
+                                            <th>删除操作</th>
+                                            <th>编辑操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for book_obj in book_list %}
+                                            <tr>
+                                                <td>{{ forloop.counter }}</td>
+                                                <td id="book_title_{{ book_obj.pk }}">{{ book_obj.title }}</td>
+                                                <td id="book_price_{{ book_obj.pk }}">{{ book_obj.price }}</td>
+                                                <td id="book_publishDate_{{ book_obj.pk }}">{{ book_obj.publishDate | date:'Y-m-d'}}</td>
+                                                <td class="book_publish_{{ book_obj.pk }}" name="{{ book_obj.publish.pk }}"><a href="/book/{{ book_obj.publish.pk }}/check_publish_book/" target="_Blank">{{ book_obj.publish.name }}</a></td>
+                                                <td class="col-md-2">
+                                                    {% for author in book_obj.authors.all %}
+                                                        {% if forloop.last %}
+                                                            <a href="/book/{{ author.pk }}/check_author_book/" target="_Blank" class="book_author_{{ book_obj.pk }}" name="{{ author.pk }}">{{ author.name }}</a>
+                                                        {% else %}
+                                                            <a href="/book/{{ author.pk }}/check_author_book/" target="_Blank" class="book_author_{{ book_obj.pk }}" name="{{ author.pk }}">{{ author.name }}</a>,
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </td>
+                                                <td><a name = "{{ book_obj.pk }}" class="btn btn-info change_book" data-toggle="modal" data-target="#change_book">编辑</a></td>
+                                                <td><a name="{{ book_obj.pk }}" class="btn btn-danger delete_book">删除</a></td>
+                                            </tr>
+                                            {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                    </div>
+
+                    <!-- 作者页 -->
+                    <div role="tabpanel" class="tab-pane" href="#author" id="author">
+
+                        <!-- 编辑作者模态框 -->
+                        <div class="modal fade" id="changeAuthor" tabindex="-1" role="dialog" aria-labelledby="changeAuthorLabel">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+
+                              <!-- 编辑作者模态框头 -->
+                              <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="changeAuthorLabel">编辑作者信息</h4>
+                              </div>
+
+                                <!-- 编辑作者模态框体 -->
+                              <div class="modal-body">
+                                  <form  action="" id="changeAuthorAjax" method="post">
+                                    {%  csrf_token %}
+                                    <div class="form-group">
+                                        <label for="">姓名</label>
+                                        <input type="text" class="form-control changeAuthorName"  name="name" value="">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="">年龄</label>
+                                        <input type="text" class="form-control changeAuthorAge" name="age" value="">
+                                    </div>
+                                </form>
+                              </div>
+
+                                <!-- 编辑作者模态框脚 -->
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-default change_author_cancel" data-dismiss="modal">取消</button>
+                                <button href="" name="" type="button" class="btn btn-primary change_author_save">保存</button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- 新增作者模态框 -->
+                        <div class="modal fade" id="add_author" tabindex="-1" role="dialog" aria-labelledby="add_authorLabel">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+
+                              <!-- 新增书籍模态框头 -->
+                              <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title " id="add_bookLabel">新增作者</h4>
+                              </div>
+
+                                <!-- 新增作者模态框体 -->
+                              <div class="modal-body">
+                                  <form id="addAuthorAjax" action="" method="post" enctype="multipart/form-data">
+                                    {%  csrf_token %}
+                                    <div class="form-group">
+                                        <label for="">姓名</label>
+                                        <input type="text" class="form-control addAuthorName"  name="name" value="" >
+                                    </div>
+                                    <div class="form-group ">
+                                        <label for="">年龄</label>
+                                        <input type="text" class="form-control addAuthorAge" name="age" value="">
+                                    </div>
+                                </form>
+                              </div>
+
+                                <!-- 新增书籍模态框脚 -->
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-default add_author_cancel " data-dismiss="modal">取消</button>
+                                <button  type="button" class="btn btn-primary add_author_save">保存</button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- 作者列表展示 -->
+                        <div class="col-md-10 col-md-offset-1">
+                                <a  class="add_btn btn btn-info" data-toggle="modal" data-target="#add_author">新增作者</a>
+                                <table class="table table-hover table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>编号</th>
+                                            <th>作者姓名</th>
+                                            <th>作者年龄</th>
+                                            <th>删除操作</th>
+                                            <th>编辑操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for author in author_list %}
+                                            <tr>
+                                                <td>{{ forloop.counter }}</td>
+                                                <td ><a href="/book/{{ author.pk }}/check_author_book/" target="_blank" id = 'author_name_{{ author.pk }}'>{{ author.name }}</a></td>
+                                                <td id = 'author_age_{{ author.pk }}'>{{ author.age }}</td>
+                                                <td><a name = "{{ author.pk }}" class="btn btn-info change_author" data-toggle="modal" data-target="#changeAuthor">编辑</a></td>
+                                                {% if author in use_author_list %}
+                                                    <td><a name="{{ author.pk }}" readonly class="btn btn-default ">不能删除</a></td>
+                                                {% else %}
+                                                    <td><a name="{{ author.pk }}"  class="btn btn-danger delete_author">删除</a></td>
+                                                {% endif %}
+                                            </tr>
+                                            {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+
+                    </div>
+
+                    <!-- 出版社页 -->
+                    <div role="tabpanel" class="tab-pane" href="#publish/" id="publish">
+
+                        <!-- 编辑出版社模态框 -->
+                        <div class="modal fade" id="change_publish" tabindex="-1" role="dialog" aria-labelledby="changePublishLabel">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+
+                              <!-- 编辑出版社模态框头 -->
+                              <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="changePublishLabel">编辑出版社信息</h4>
+                              </div>
+
+                                <!-- 编辑出版社模态框体 -->
+                              <div class="modal-body">
+                                  <form  action="" id="changePublishAjax" method="post">
+                                    {%  csrf_token %}
+                                    <div class="form-group">
+                                        <label for="">出版社名称</label>
+                                        <input type="text" class="form-control changePublishName"  name="name" value="">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="">城市</label>
+                                        <input type="text" class="form-control changePublishCity" name="city" value="">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="">邮箱</label>
+                                        <input type="text" class="form-control changePublishEmail" name="email" value="">
+                                    </div>
+                                </form>
+                              </div>
+
+                                <!-- 编辑出版社模态框脚 -->
+                              <div class="modal-footer">
+                                <button  type="button" class="btn btn-default change_publish_cancel " data-dismiss="modal">取消</button>
+                                <button href="" name="" type="button" class="btn btn-primary change_publish_save">保存</button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- 新增出版社模态框 -->
+                        <div class="modal fade" id="add_publish" tabindex="-1" role="dialog" aria-labelledby="add_publishLabel">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+
+                              <!-- 新增出版社模态框头 -->
+                              <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title " id="add_publishLabel">新增出版社</h4>
+                              </div>
+
+                                <!-- 新增出版社模态框体 -->
+                              <div class="modal-body">
+                                  <form id="addPublishAjax" action="" method="post" enctype="multipart/form-data">
+                                    {%  csrf_token %}
+                                    <div class="form-group">
+                                        <label for="">出版社名称</label>
+                                        <input type="text" class="form-control addPublishName"  name="name" value="">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="">城市</label>
+                                        <input type="text" class="form-control addPublishCity" name="city" value="">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="">邮箱</label>
+                                        <input type="text" class="form-control addPublishEmail" name="email" value="">
+                                    </div>
+                                </form>
+                              </div>
+
+                                <!-- 新增出版社模态框脚 -->
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-default add_publish_cancel" data-dismiss="modal">取消</button>
+                                <button  type="button" class="btn btn-primary add_publish_save">保存</button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+
+                       <!-- 展示出版社 -->
+                        <div class="col-md-10 col-md-offset-1">
+                                <a class="add_btn btn btn-info "data-toggle="modal" data-target="#add_publish">新增出版社</a>
+                                <table class="table table-hover table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>编号</th>
+                                            <th>出版社名</th>
+                                            <th>城市</th>
+                                            <th>邮箱</th>
+                                            <th>删除操作</th>
+                                            <th>编辑操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for publish in publish_list %}
+                                            <tr>
+                                                <td>{{ forloop.counter }}</td>
+                                                <td><a href="/book/{{ publish.pk }}/check_publish_book/" target="_blank" id="publish_name_{{ publish.pk }}">{{ publish.name }}</a></td>
+                                                <td id="publish_city_{{ publish.pk }}">{{ publish.city }}</td>
+                                                <td id="publish_email_{{ publish.pk }}">{{ publish.email }}</td>
+                                                <td><a  href=""name="{{ publish.pk }}" class="btn btn-info change_publish" data-toggle="modal" data-target="#change_publish">编辑</a></td>
+                                                <td><a href="" name="{{ publish.pk }}" class="btn btn-danger  delete_publish">删除</a></td>
+                                            </tr>
+                                            {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                    </div>
+
+                {% endblock %}
+              </div>
+
+            </div>
+
+            {% block page %}
+            {% endblock %}
+
+        </div>
+    </div>
+    <script type="text/javascript" src="/static/js/jquery-min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/js/bookhome.js"></script>
+</body>
+</html>

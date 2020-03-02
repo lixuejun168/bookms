@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>bookms</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/home.css">
+</head>
+<body>
+
+    <div class="container ">
+        <div class="row">
+            {% block head %}
+                <h3>出版社："{{ publish_name }}" 的所有书籍</h3>
+            {% endblock %}
+            <!-- 编辑书籍模态框 -->
+            <div class="modal fade" id="change_book" tabindex="-1" role="dialog" aria-labelledby="change_bookLabel">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+
+                  <!-- 编辑书籍模态框头 -->
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title " id="change_bookLabel">编辑书籍</h4>
+                  </div>
+
+                    <!-- 编辑书籍模态框体 -->
+                  <div class="modal-body">
+                      <form id="changeBookAjax" action="" method="post" enctype="multipart/form-data">
+                        {%  csrf_token %}
+                        <div class="form-group">
+                            <label for="">名称</label>
+                            <input type="text" class="form-control changeBookTitle" readonly name="title" value="编辑书籍" >
+                        </div>
+                        <div class="form-group changeBookPrice_div">
+                            <label for="">价格</label>
+                            <input type="text" class="form-control changeBookPrice" name="price" value="">
+                        </div>
+                        <div class="form-group ">
+                            <label for="">出版日期</label>
+                            <input type="date" class="form-control changeBookPublishDate" name="publishDate" value="">
+                        </div>
+                        <div class="form-group">
+                            <label for="">出版社</label>
+                            <select class="form-control" name="publish_id" >
+                                {% for publish in publish_list %}
+                                    <option class="changeBookPublish_{{ publish.pk }} bookModalPublish" value="{{ publish.pk }}">{{ publish.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="">作者</label>
+                            <select type="test"  name="author_id_list" multiple="multiple"  size="5" class="form-control " >
+                                {% for author in author_list %}
+                                    <option class="changeBookAuthor_{{ author.pk }} change_book_author" value="{{ author.pk }}">{{ author.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+                  </div>
+
+                    <!-- 编辑书籍模态框脚 -->
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default change_book_cancel" data-dismiss="modal">取消</button>
+                    <button href="" name="" type="button" class="btn btn-primary change_book_save">保存</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 书籍列表展示-->
+            <div class="col-md-10 col-md-offset-1">
+                <table class="table  table-bordered table-hover check_head">
+                    <thead>
+                        <tr>
+                            <th>编号</th>
+                            <th>书籍名称</th>
+                            <th>价格</th>
+                            <th>出版时间</th>
+                            <th>出版社</th>
+                            <th>作者</th>
+                            <th>删除操作</th>
+                            <th>编辑操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for book_obj in book_list %}
+                            <tr>
+                                <td>{{ book_obj.pk }}</td>
+                                <td id="book_title_{{ book_obj.pk }}">{{ book_obj.title }}</td>
+                                <td id="book_price_{{ book_obj.pk }}">{{ book_obj.price }}</td>
+                                <td id="book_publishDate_{{ book_obj.pk }}">{{ book_obj.publishDate | date:'Y-m-d'}}</td>
+                                <td class="book_publish_{{ book_obj.pk }}" name="{{ book_obj.publish.pk }}"><a href="/book/{{ book_obj.publish.pk }}/check_publish_book/" target="_Blank">{{ book_obj.publish.name }}</a></td>
+                                <td class="col-md-2">
+                                    {% for author in book_obj.authors.all %}
+                                        {% if forloop.last %}
+                                            <a href="/book/{{ author.pk }}/check_author_book/" target="_Blank" class="book_author_{{ book_obj.pk }}" name="{{ author.pk }}">{{ author.name }}</a>
+                                        {% else %}
+                                            <a href="/book/{{ author.pk }}/check_author_book/" target="_Blank" class="book_author_{{ book_obj.pk }}" name="{{ author.pk }}">{{ author.name }}</a>,
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td><a name = "{{ book_obj.pk }}" class="btn btn-info change_book" data-toggle="modal" data-target="#change_book">编辑</a></td>
+                                <td><a name="{{ book_obj.pk }}" class="btn btn-danger delete_book">删除</a></td>
+                            </tr>
+                            {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 分页 -->
+            <div class="col-md-offset-3">
+                <nav aria-label="Page navigation">
+                  <ul class="pagination">
+                    {% if book_list.has_previous %}
+                    <li><a href="?page={{ book_list.previous_page_number  }}" aria-label="Previous"><span aria-hidden="true">上一页</span></a></li>
+                    {% else %}
+                    <li class="disabled"><a href="" aria-label="Previous"><span aria-hidden="true">上一页</span></a></li>
+                    {% endif %}
+
+                    {% for item in page_range %}
+
+                        {% if current_page_num == item %}
+                            <li class="active"><a href="?page={{ item }}">{{ item }}</a></li>
+                        {% else %}
+                            <li><a href="?page={{ item }}">{{ item }}</a></li>
+                        {% endif %}
+
+                    {% endfor %}
+
+                    {% if book_list.has_next %}
+                        <li><a href="?page={{ book_list.next_page_number  }}" aria-label="Next"><span aria-hidden="true">下一页</span></a>
+                    {% else %}
+                                <li class="disabled"><a href="" aria-label="Next"><span aria-hidden="true">下一页</span></a>
+                    {% endif %}
+                </li>
+                  </ul>
+                </nav>
+            </div>
+
+        </div>
+    </div>
+    <script type="text/javascript" src="/static/js/jquery-min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/js/bookhome.js"></script>
+</body>
+</html>
